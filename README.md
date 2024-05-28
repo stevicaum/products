@@ -1,5 +1,5 @@
 # HOW TO RUN
-1. Run Postgres: Navigate to the ``/docker/dev`` directory and execute the command ``docker-compose up``
+1. Run Postgres, Kafka, Kafka drop: Navigate to the ``/docker/dev`` directory and execute the command ``docker-compose up``
 2. Use java corretto 21 and run maven(v3) command ``mvn clean install``
 3. Run main class ``org.show.ProductsApp``
 4. Default Security: Security is enabled by default.
