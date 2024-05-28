@@ -8,6 +8,7 @@
    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbeyJhdXRob3JpdHkiOiJST0xFX0FETUlOIn0seyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlzcyI6Imh0dHA6Ly9ib29rcy5jb20iLCJpYXQiOjE3MTUxNjEwNTAsImV4cCI6MTcxNTUyMTA1MH0._G-R9Yi3t1JHEadf1HR7UfY8yFB7IQ1uVZTU2yEqzmk'``
 6. Swagger documentation: http://localhost:8080/swagger-ui/index.html
 7. Running without Security: To run without security, execute the main class ``org.show.ProductsApp`` with VM options ``-Dspring.profiles.active=no-security``
+8. To check kafka messages use Kafka drop: ``http://localhost:9000/``
 
 
 
