@@ -17,7 +17,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final KafkaProducer kafkaProducer;
 
-    public ProductService(final ProductRepository productRepository, final KafkaProducer kafkaProducer){
+    public ProductService(final ProductRepository productRepository, final KafkaProducer kafkaProducer) {
         this.productRepository = productRepository;
         this.kafkaProducer = kafkaProducer;
     }
@@ -59,13 +59,13 @@ public class ProductService {
 
     public ProductDto getById(final Long id) {
         final Optional<Product> response = productRepository.findById(id);
-        if(!response.isPresent()){
+        if (!response.isPresent()) {
             throw new ResourceNotFoundException(String.format(ResourceNotFoundException.PRODUCT, id));
         }
         return mapProduct(response.get());
     }
 
     private ProductDto mapProduct(final Product product) {
-        return  new ProductDto(product.getId(), product.getName(), product.getPrice());
+        return new ProductDto(product.getId(), product.getName(), product.getPrice());
     }
 }

@@ -6,8 +6,8 @@ import static org.show.config.security.UserProvider.USER_DETAILS;
 
 public class JwtUserGenerator implements Serializable {
 
-  public static void main(String[] args) {
-    System.out.println(JwtAdminGenerator.generateToken(USER_DETAILS, 3600));
-  }
+    public static void main(String[] args) {
+        System.out.println(JwtAdminGenerator.generateToken(USER_DETAILS, 3600));
+    }
 
 }

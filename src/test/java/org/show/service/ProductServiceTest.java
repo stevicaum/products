@@ -33,7 +33,7 @@ public class ProductServiceTest {
     private ProductService productService;
 
     @BeforeEach
-    void init(){
+    void init() {
         MockitoAnnotations.initMocks(this);
         objectMapper = new ObjectMapper();
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -42,12 +42,12 @@ public class ProductServiceTest {
     }
 
     @Test
-    void update(){
+    void update() {
         Long id = 2l;
         ProductNoIdDto product = new ProductNoIdDto("test-product-name", new BigDecimal(3.2));
-        Product inDB = new Product(id,"exist_in_db", new BigDecimal(1.2));
+        Product inDB = new Product(id, "exist_in_db", new BigDecimal(1.2));
         when(productRepository.findById(id)).thenReturn(Optional.of(inDB));
-        when(productRepository.save(any())).thenReturn(new Product(id,product.getName(), product.getPrice()));
+        when(productRepository.save(any())).thenReturn(new Product(id, product.getName(), product.getPrice()));
         ProductDto actual = productService.update(id, product);
         assertEquals(inDB.getId(), actual.getId());
         assertEquals(product.getPrice(), actual.getPrice());

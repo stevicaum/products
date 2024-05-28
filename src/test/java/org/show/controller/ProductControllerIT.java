@@ -70,7 +70,7 @@ public class ProductControllerIT {
         String json = objectMapper.writeValueAsString(productForSave);
         when(productService.save(any())).thenReturn(productDto);
         final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(PRODUCTS).contentType(MediaType.APPLICATION_JSON)
-                .content(json).with(csrf())).andExpect(status().isBadRequest()) .andReturn();
+                .content(json).with(csrf())).andExpect(status().isBadRequest()).andReturn();
         assertNotNull(result.getResponse().getContentAsString());
 //        final ProductDto response =objectMapper.readValue(result.getResponse().getContentAsString(), ProductDto.class);
 //        assertEquals(productDto.getId(), response.getId());
@@ -93,9 +93,9 @@ public class ProductControllerIT {
         String json = objectMapper.writeValueAsString(productForSave);
         when(productService.save(any())).thenReturn(productDto);
         final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(PRODUCTS).contentType(MediaType.APPLICATION_JSON)
-                        .content(json).with(csrf())).andExpect(status().isOk()).andReturn();
+                .content(json).with(csrf())).andExpect(status().isOk()).andReturn();
         assertNotNull(result.getResponse().getContentAsString());
-        final ProductDto response =objectMapper.readValue(result.getResponse().getContentAsString(), ProductDto.class);
+        final ProductDto response = objectMapper.readValue(result.getResponse().getContentAsString(), ProductDto.class);
         assertEquals(productDto.getId(), response.getId());
         assertEquals(productDto.getName(), response.getName());
         assertEquals(productDto.getPrice(), response.getPrice());
