@@ -2,9 +2,9 @@ package org.show.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,15 +14,15 @@ import org.show.repository.ProductRepository;
 import org.show.service.kafka.KafkaProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,26 +35,28 @@ public class ProductServiceIT {
     private ProductRepository productRepository;
     @Autowired
     KafkaTemplate<Long, String> kafkaTemplate;
-    private BlockingQueue<ConsumerRecord<Long, String>> consumptionQueue = new LinkedBlockingDeque<>();
-    private ObjectMapper objectMapper;
+    @Autowired
+    private ConsumerFactory<Long, String> consumerFactory;
     private ProductService productService;
+    Consumer<Long, String> consumer;
 
     @BeforeEach
-    void init() {
-        objectMapper = new ObjectMapper();
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        objectMapper.registerModule(new JavaTimeModule());
-        productService = new ProductService(productRepository, new KafkaProducer(kafkaTemplate, EVENT_TOPIC,objectMapper));
+    void setup() {
+        consumer = consumerFactory.createConsumer("consumer", null);
+        consumer.subscribe(Collections.singleton(EVENT_TOPIC));
+        consumer.poll(0);
     }
 
-    @KafkaListener(topics = EVENT_TOPIC, groupId = "listener")
-    private void listen(ConsumerRecord<Long, String> consumerRecord) throws InterruptedException {
-        consumptionQueue.put(consumerRecord);
+    @AfterEach
+    void after() {
+        consumer.close();
     }
 
     @Test
     @Sql("/sql/oneProductInDb.sql")
     void saveProduct() throws JsonProcessingException, InterruptedException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        productService = new ProductService(productRepository, new KafkaProducer(kafkaTemplate, EVENT_TOPIC, objectMapper));
         assertEquals(1, productRepository.count());
         ProductNoIdDto productForSave = new ProductNoIdDto("test-product-name", new BigDecimal(3.2));
         Long id = 2l;
@@ -64,18 +66,11 @@ public class ProductServiceIT {
         assertEquals(productForSave.getName(), response.getName());
         assertEquals(productForSave.getPrice(), response.getPrice());
 
-        ConsumerRecord<Long, String> consumerRecord = consumptionQueue.poll();
-        int retry = 0;
-        while(consumerRecord==null&&retry<5){
-            retry++;
-            Thread.sleep(5000);
-            System.out.println("Number of retry="+retry);
-            consumerRecord = consumptionQueue.poll();
-        }
-        ProductDto actual =objectMapper.readValue(consumerRecord.value(), ProductDto.class);
-        assertEquals(id,actual.getId() );
-        assertEquals(productForSave.getName(),actual.getName() );
-        assertEquals(productForSave.getPrice(),actual.getPrice() );
+        ConsumerRecord<Long, String> consumerRecord = KafkaTestUtils.getSingleRecord(consumer, EVENT_TOPIC);
+        ProductDto actual = objectMapper.readValue(consumerRecord.value(), ProductDto.class);
+        assertEquals(id, actual.getId());
+        assertEquals(productForSave.getName(), actual.getName());
+        assertEquals(productForSave.getPrice(), actual.getPrice());
     }
 
 }
